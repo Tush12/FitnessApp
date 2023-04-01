@@ -3,8 +3,11 @@ package com.example.fitnessapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -26,30 +29,40 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref",MODE_PRIVATE);
+        SharedPreferences.Editor myEdit = sharedPreferences.edit();
+        Boolean LOGIN = sharedPreferences.getBoolean("LOGIN", false);
+        Log.d("login", String.valueOf(LOGIN));
+        if (LOGIN) {
+            setContentView(R.layout.activity_main);
 
-        logout = findViewById(R.id.logout);
-        userName = findViewById(R.id.userName);
+            logout = findViewById(R.id.logout);
+            userName = findViewById(R.id.userName);
 
-        gOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
-        gClient = GoogleSignIn.getClient(this, gOptions);
+            gOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
+            gClient = GoogleSignIn.getClient(this, gOptions);
 
-        GoogleSignInAccount gAccount = GoogleSignIn.getLastSignedInAccount(this);
-        if (gAccount != null){
-            String gName = gAccount.getDisplayName();
-            userName.setText(gName);
-        }
-        logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                gClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        finish();
-                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                    }
-                });
+            GoogleSignInAccount gAccount = GoogleSignIn.getLastSignedInAccount(this);
+            if (gAccount != null) {
+                String gName = gAccount.getDisplayName();
+                userName.setText(gName);
             }
-        });
+            logout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    gClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            finish();
+                            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                        }
+                    });
+                }
+            });
+        }else{
+            Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+            startActivity(intent);
+            Log.d("ELSE", "ELSE");
+        }
     }
 }
